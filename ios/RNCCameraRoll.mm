@@ -440,7 +440,11 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
 
-  NSString *const sortByTimestamp = [RCTConvert NSString:params[@"sortByTimestamp"]];
+  NSString *sortByTimestamp = nil;
+  id sortByValue = params[@"sortByTimestamp"];
+  if ([sortByValue isKindOfClass:[NSString class]]) {
+    sortByTimestamp = (NSString *)sortByValue;
+  }
 
   BOOL __block includeSharedAlbums = [params[@"includeSharedAlbums"] boolValue];
 
