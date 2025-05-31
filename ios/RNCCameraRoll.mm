@@ -53,7 +53,11 @@ RCT_ENUM_CONVERTER(PHAssetCollectionSubtype, (@{
                                          toTime:(NSUInteger)toTime
 {
   // This is not exhaustive in terms of supported media type predicates; more can be added in the future
-  NSString *const lowercase = [mediaType lowercaseString];
+  NSString *lowercase = @"all"; // Default
+  if ([mediaType isKindOfClass:[NSString class]] && [mediaType length] > 0) {
+      lowercase = [mediaType lowercaseString];
+  }
+
   NSMutableArray *format = [NSMutableArray new];
   NSMutableArray *arguments = [NSMutableArray new];
 
@@ -433,8 +437,18 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const first = [RCTConvert NSInteger:params[@"first"]];
   NSString *const afterCursor = [RCTConvert NSString:params[@"after"]];
   NSString *const groupName = [RCTConvert NSString:params[@"groupName"]];
-  NSString *const groupTypes = [[RCTConvert NSString:params[@"groupTypes"]] lowercaseString];
-  NSString *const mediaType = [RCTConvert NSString:params[@"assetType"]];
+  NSString *groupTypes = @"all"; // Default based on JS logic for iOS
+  id groupTypesValue = params[@"groupTypes"];
+  if ([groupTypesValue isKindOfClass:[NSString class]] && [(NSString *)groupTypesValue length] > 0) {
+    groupTypes = [(NSString *)groupTypesValue lowercaseString];
+  }
+
+  NSString *mediaType = @"All"; // Default from JS
+  id assetTypeValue = params[@"assetType"];
+  if ([assetTypeValue isKindOfClass:[NSString class]] && [(NSString *)assetTypeValue length] > 0) {
+    mediaType = (NSString *)assetTypeValue;
+  }
+
   NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
