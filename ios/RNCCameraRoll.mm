@@ -440,6 +440,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
 
+  NSString *const sortByTimestamp = [RCTConvert NSString:params[@"sortByTimestamp"]];
+
   BOOL __block includeSharedAlbums = [params[@"includeSharedAlbums"] boolValue];
 
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
@@ -465,7 +467,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     //   will not be set, as expected
     assetFetchOptions.fetchLimit = first + 1;
   }
-  assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+  if ([sortByTimestamp isEqualToString:@"asc"]) {
+    assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:YES]];
+  } else {
+    // Default to descending if sortByTimestamp is not "asc" or is nil
+    assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+  }
 
   if (includeSharedAlbums) {
     assetFetchOptions.includeAssetSourceTypes = PHAssetSourceTypeUserLibrary | PHAssetSourceTypeCloudShared;

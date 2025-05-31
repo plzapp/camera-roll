@@ -120,6 +120,14 @@ export type GetPhotosParams = {
   mimeTypes?: Array<string>;
 
   /**
+   * Specifies how to sort the assets by timestamp.
+   * - `asc`: Oldest first.
+   * - `desc`: Newest first.
+   * Default is `desc`.
+   */
+  sortByTimestamp?: 'asc' | 'desc';
+
+  /**
    * Specific fields in the output that we want to include, even though they
    * might have some performance impact.
    */

@@ -365,6 +365,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
             fromTime,
             toTime,
             include,
+            params.hasKey("sortByTimestamp") ? params.getString("sortByTimestamp") : "desc",
             promise)
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
@@ -421,6 +422,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     private final long mFromTime;
     private final long mToTime;
     private final Set<String> mInclude;
+    private final String mSortByTimestamp;
 
     private GetMediaTask(
             ReactContext context,
@@ -432,6 +434,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
             long fromTime,
             long toTime,
             @Nullable ReadableArray include,
+            String sortByTimestamp,
             Promise promise) {
       super(context);
       mContext = context;
@@ -444,6 +447,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
       mFromTime = fromTime;
       mToTime = toTime;
       mInclude = createSetFromIncludeArray(include);
+      mSortByTimestamp = sortByTimestamp;
     }
 
     private static Set<String> createSetFromIncludeArray(@Nullable ReadableArray includeArray) {
@@ -467,6 +471,17 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
     protected void doInBackgroundGuarded(Void... params) {
       StringBuilder selection = new StringBuilder("1");
       List<String> selectionArgs = new ArrayList<>();
+      String sortOrder = null;
+      String dateColumn1 = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ? Images.Media.DATE_ADDED : Images.Media.DATE_TAKEN;
+      String dateColumn2 = Images.Media.DATE_MODIFIED;
+
+      if (mSortByTimestamp != null && mSortByTimestamp.equals("asc")) {
+        sortOrder = dateColumn1 + " ASC, " + dateColumn2 + " ASC";
+      } else {
+        // Default to descending
+        sortOrder = dateColumn1 + " DESC, " + dateColumn2 + " DESC";
+      }
+
       if (!TextUtils.isEmpty(mGroupName)) {
         selection.append(" AND " + SELECTION_BUCKET);
         selectionArgs.add(mGroupName);
@@ -526,7 +541,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
           bundle.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection.toString());
           bundle.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS,
                   selectionArgs.toArray(new String[selectionArgs.size()]));
-          bundle.putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+          bundle.putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, sortOrder);
           bundle.putInt(ContentResolver.QUERY_ARG_LIMIT, mFirst + 1);
           if (!TextUtils.isEmpty(mAfter)) {
             bundle.putInt(ContentResolver.QUERY_ARG_OFFSET, Integer.parseInt(mAfter));
@@ -547,7 +562,7 @@ public class CameraRollModule extends NativeCameraRollModuleSpec {
                   PROJECTION,
                   selection.toString(),
                   selectionArgs.toArray(new String[selectionArgs.size()]),
-                  Images.Media.DATE_ADDED + " DESC, " + Images.Media.DATE_MODIFIED + " DESC");
+                  sortOrder);
         }
 
         if (media == null) {

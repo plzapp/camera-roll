@@ -79,7 +79,7 @@ type PhotoIdentifiersPage = {
 
 export interface Spec extends TurboModule {
   saveToCameraRoll(uri: string, options: Object): Promise<PhotoIdentifier>;
-  getPhotos(params: Object): Promise<PhotoIdentifiersPage>;
+  getPhotos(params: {first: number, after?: string, groupTypes?: string, groupName?: string, includeSharedAlbums?: boolean, assetType?: string, fromTime?: number, toTime?: number, mimeTypes?: Array<string>, sortByTimestamp?: 'asc' | 'desc', include?: Array<string>}): Promise<PhotoIdentifiersPage>;
   getAlbums(params: Object): Promise<Album[]>;
   deletePhotos(photoUris: Array<string>): Promise<void>;
   getPhotoByInternalID(
