@@ -432,6 +432,10 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
+  if (params == nil) {
+    reject(@"E_INVALID_PARAMS", @"Parameters cannot be nil.", nil);
+    return;
+  }
   checkPhotoLibraryConfig();
 
   NSUInteger const first = [RCTConvert NSInteger:params[@"first"]];
